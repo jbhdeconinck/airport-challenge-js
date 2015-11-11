@@ -1,56 +1,35 @@
 describe("Airport", function() {
   var airport;
-  var plane, flying, land;
+  var plane;
 
   beforeEach(function() {
-
     airport = new Airport();
+    plane = jasmine.createSpy(plane);
+  });
 
-    plane = {
-        setFlying: function(value) {
-          flying = value;
-        },
-        getFlying: function() {
-          return flying;
-        },
-        setLand: function(value) {
-          land = value;
-        },
-        getLand: function() {
-          return land;
-        }
-    };
 
-    weather = {
-        setStormy: function(value) {
-          stormy = value;
-        },
+  it('has no planes by default', function(){
+    expect(airport.planes()).toEqual([]);
+  });
 
-        getStormy: function() {
-          return stormy;
-        }
-    };
-
+  it('adapts instructions if weather stormy', function() {
+    expect(airport.isStormy()).toBeFalsy();
   });
 
   describe("instructToLand", function() {
 
-    it("reports plane has landed", function() {
-      airport.instructToLand(plane)
-      expect(airport.planes.length).toEqual(1)
+    it('can clear planes for landing', function(){
+      airport.instructToLand(plane);
+      expect(airport.planes()).toEqual([plane]);
     });
-
   });
 
   describe("instructToTakeOff", function() {
 
     it("instructs plane to take off", function() {
-      expect(airport.instructToTakeOff(plane)).toEqual(plane)
-    });
-
-    it("cannot instruct to take off when stormy", function() {
-      weather.setStormy(true)
-      expect(function() { airport.instructToTakeOff(plane) }).toThrowError("cannot take off in stormy weather")
+      airport.instructToLand(plane);
+      airport.instructToTakeOff(plane);
+      expect(airport.planes()).toEqual([]);
     });
 
   });
@@ -65,6 +44,14 @@ describe("Airport", function() {
 
   });
 
-
-
+  describe('when weather is stormy', function() {
+    it('can instruct plane not to take-off', function(){
+      spyOn(airport,'isStormy').and.returnValue(true);
+      expect(function() { airport.instructToTakeOff(plane); }).toThrowError('cannot take-off in stormy weather');
+    });
+    it('can instruct plane not to land', function(){
+      spyOn(airport,'isStormy').and.returnValue(true);
+      expect(function() { airport.instructToLand(plane); }).toThrowError('cannot land in stormy weather');
+    });
+  });
 });
